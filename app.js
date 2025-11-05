@@ -9,6 +9,7 @@ const authRoutes = require('./routes/auth');
 const adRoutes = require('./routes/ad');
 const friendRoutes = require('./routes/friend');
 const userRoutes = require('./routes/user');
+const initRoutes = require('./routes/init');
 const compression = require('compression');
 const app = express();
 
@@ -40,6 +41,7 @@ app.use('/api', authRoutes);
 app.use('/api/ads', adRoutes);
 app.use('/api/friends', friendRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/init', initRoutes);
 
 // Vercel serverless 导出
 module.exports = app;
