@@ -113,7 +113,7 @@ async function insertDefaultData(client) {
   try {
     // 检查菜单表是否为空
     const menuCount = await client.query('SELECT COUNT(*) as count FROM menus');
-    if (menuCount.rows[0].count === '0') {
+    if (parseInt(menuCount.rows[0].count) === 0) {
       const defaultMenus = [
         ['Home', 1],
         ['Ai Stuff', 2],
@@ -132,7 +132,7 @@ async function insertDefaultData(client) {
     
     // 检查用户表是否为空
     const userCount = await client.query('SELECT COUNT(*) as count FROM users');
-    if (userCount.rows[0].count === '0') {
+    if (parseInt(userCount.rows[0].count) === 0) {
       const passwordHash = await bcrypt.hash(config.admin.password, 10);
       await client.query('INSERT INTO users (username, password) VALUES ($1, $2)', [
         config.admin.username,
@@ -144,7 +144,7 @@ async function insertDefaultData(client) {
     
     // 检查友情链接表是否为空
     const friendCount = await client.query('SELECT COUNT(*) as count FROM friends');
-    if (friendCount.rows[0].count === '0') {
+    if (parseInt(friendCount.rows[0].count) === 0) {
       const defaultFriends = [
         ['Noodseek图床', 'https://www.nodeimage.com', 'https://www.nodeseek.com/static/image/favicon/favicon-32x32.png'],
         ['Font Awesome', 'https://fontawesome.com', 'https://fontawesome.com/favicon.ico']
