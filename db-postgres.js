@@ -167,16 +167,38 @@ const db = {
   all: (sql, params = []) => {
     let paramIndex = 1;
     const pgSql = sql.replace(/\?/g, () => `$${paramIndex++}`);
+    console.log('db.all SQL:', pgSql);
+    console.log('db.all params:', params);
     return pool.query(pgSql, params)
-      .then(result => result.rows);
+      .then(result => {
+        console.log('db.all 返回行数:', result.rows.length);
+        return result.rows;
+      })
+      .catch(err => {
+        console.error('db.all 错误:', err.message);
+        console.error('SQL:', pgSql);
+        console.error('Params:', params);
+        throw err;
+      });
   },
   
   // 执行查询 (单行)
   get: (sql, params = []) => {
     let paramIndex = 1;
     const pgSql = sql.replace(/\?/g, () => `$${paramIndex++}`);
+    console.log('db.get SQL:', pgSql);
+    console.log('db.get params:', params);
     return pool.query(pgSql, params)
-      .then(result => result.rows[0]);
+      .then(result => {
+        console.log('db.get 返回:', result.rows[0]);
+        return result.rows[0];
+      })
+      .catch(err => {
+        console.error('db.get 错误:', err.message);
+        console.error('SQL:', pgSql);
+        console.error('Params:', params);
+        throw err;
+      });
   },
   
   // 执行更新/插入/删除

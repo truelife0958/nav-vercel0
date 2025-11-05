@@ -6,10 +6,13 @@ const router = express.Router();
 // 获取所有菜单（包含子菜单）
 router.get('/', async (req, res) => {
   try {
+    console.log('=== 获取菜单请求 ===');
     const { page, pageSize } = req.query;
     if (!page && !pageSize) {
       // 获取主菜单
+      console.log('查询主菜单...');
       const menus = await db.all('SELECT * FROM menus ORDER BY sort_order', []);
+      console.log('主菜单数量:', menus.length);
       
       // 为每个主菜单获取子菜单
       const menusWithSubMenus = await Promise.all(menus.map(async (menu) => {
@@ -39,7 +42,12 @@ router.get('/', async (req, res) => {
       });
     }
   } catch (err) {
-    res.status(500).json({error: err.message});
+    console.error('❌ 获取菜单失败:', err);
+    console.error('错误堆栈:', err.stack);
+    res.status(500).json({
+      error: err.message,
+      stack: process.env.NODE_ENV === 'production' ? undefined : err.stack
+    });
   }
 });
 
