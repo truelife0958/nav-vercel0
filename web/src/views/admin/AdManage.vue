@@ -58,8 +58,10 @@ onMounted(loadAds);
 
 async function loadAds() {
   const res = await getAds();
-  leftAds.value = res.data.filter(ad => ad.position === 'left');
-  rightAds.value = res.data.filter(ad => ad.position === 'right');
+  // API 直接返回数组，不是 {data: []}
+  const ads = Array.isArray(res) ? res : (res.data || []);
+  leftAds.value = ads.filter(ad => ad.position === 'left');
+  rightAds.value = ads.filter(ad => ad.position === 'right');
 }
 async function handleAddAd() {
   if (!newAdImg.value || !newAdUrl.value) return;
