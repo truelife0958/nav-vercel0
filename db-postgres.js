@@ -24,7 +24,7 @@ async function initDatabase() {
         "order" INTEGER DEFAULT 0
       )
     `);
-    await client.query(`CREATE INDEX IF NOT EXISTS idx_menus_order ON menus(\"order\")`);
+    await client.query('CREATE INDEX IF NOT EXISTS idx_menus_order ON menus("order")');
     
     // 创建子菜单表
     await client.query(`
@@ -37,7 +37,7 @@ async function initDatabase() {
       )
     `);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_sub_menus_parent_id ON sub_menus(parent_id)`);
-    await client.query(`CREATE INDEX IF NOT EXISTS idx_sub_menus_order ON sub_menus(\"order\")`);
+    await client.query('CREATE INDEX IF NOT EXISTS idx_sub_menus_order ON sub_menus("order")');
     
     // 创建卡片表
     await client.query(`
@@ -57,7 +57,7 @@ async function initDatabase() {
     `);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_cards_menu_id ON cards(menu_id)`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_cards_sub_menu_id ON cards(sub_menu_id)`);
-    await client.query(`CREATE INDEX IF NOT EXISTS idx_cards_order ON cards(\"order\")`);
+    await client.query('CREATE INDEX IF NOT EXISTS idx_cards_order ON cards("order")');
     
     // 创建用户表
     await client.query(`
