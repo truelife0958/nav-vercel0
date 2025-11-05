@@ -29,7 +29,7 @@ router.get('/', async (req, res) => {
       const offset = (pageNum - 1) * size;
       
       const countRow = await db.get('SELECT COUNT(*) as total FROM menus', []);
-      const rows = await db.all('SELECT * FROM menus ORDER BY "order" LIMIT ? OFFSET ?', [size, offset]);
+      const rows = await db.all('SELECT * FROM menus ORDER BY sort_order LIMIT ? OFFSET ?', [size, offset]);
       
       res.json({
         total: countRow.total,
@@ -46,7 +46,7 @@ router.get('/', async (req, res) => {
 // 获取指定菜单的子菜单
 router.get('/:id/submenus', async (req, res) => {
   try {
-    const rows = await db.all('SELECT * FROM sub_menus WHERE parent_id = ? ORDER BY "order"', [req.params.id]);
+    const rows = await db.all('SELECT * FROM sub_menus WHERE parent_id = ? ORDER BY sort_order', [req.params.id]);
     res.json(rows);
   } catch (err) {
     res.status(500).json({error: err.message});
@@ -67,7 +67,7 @@ router.post('/', auth, async (req, res) => {
 router.put('/:id', auth, async (req, res) => {
   try {
     const { name, order } = req.body;
-    const result = await db.run('UPDATE menus SET name=?, "order"=? WHERE id=?', [name, order || 0, req.params.id]);
+    const result = await db.run('UPDATE menus SET name=?, sort_order=? WHERE id=?', [name, order || 0, req.params.id]);
     res.json({ changed: result.changes });
   } catch (err) {
     res.status(500).json({error: err.message});
@@ -87,7 +87,7 @@ router.delete('/:id', auth, async (req, res) => {
 router.post('/:id/submenus', auth, async (req, res) => {
   try {
     const { name, order } = req.body;
-    const result = await db.run('INSERT INTO sub_menus (parent_id, name, "order") VALUES (?, ?, ?)',
+    const result = await db.run('INSERT INTO sub_menus (parent_id, name, sort_order) VALUES (?, ?, ?)',
       [req.params.id, name, order || 0]);
     res.json({ id: result.lastID });
   } catch (err) {
@@ -98,7 +98,7 @@ router.post('/:id/submenus', auth, async (req, res) => {
 router.put('/submenus/:id', auth, async (req, res) => {
   try {
     const { name, order } = req.body;
-    const result = await db.run('UPDATE sub_menus SET name=?, "order"=? WHERE id=?', [name, order || 0, req.params.id]);
+    const result = await db.run('UPDATE sub_menus SET name=?, sort_order=? WHERE id=?', [name, order || 0, req.params.id]);
     res.json({ changed: result.changes });
   } catch (err) {
     res.status(500).json({error: err.message});
