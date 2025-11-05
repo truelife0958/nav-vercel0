@@ -2,9 +2,8 @@ const express = require('express');
 const db = require('../db-postgres');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const config = require('../config');
 const router = express.Router();
-
-const JWT_SECRET = 'your_jwt_secret_key';
 
 function getClientIp(req) {
   let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || '';
@@ -57,7 +56,7 @@ router.post('/login', async (req, res) => {
       
       await db.run('UPDATE users SET last_login_time=?, last_login_ip=? WHERE id=?', [now, ip, user.id]);
       
-      const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '2h' });
+      const token = jwt.sign({ id: user.id, username: user.username }, config.server.jwtSecret, { expiresIn: '2h' });
       
       console.log('登录成功:', username);
       res.json({ token, lastLoginTime, lastLoginIp });

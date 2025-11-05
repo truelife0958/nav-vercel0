@@ -1,6 +1,6 @@
 // Vercel PostgreSQL 数据库适配器
 const { Pool } = require('pg');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const config = require('./config');
 
 // 创建 PostgreSQL 连接池

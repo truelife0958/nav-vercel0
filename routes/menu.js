@@ -65,7 +65,7 @@ router.get('/:id/submenus', async (req, res) => {
 router.post('/', auth, async (req, res) => {
   try {
     const { name, order } = req.body;
-    const result = await db.run('INSERT INTO menus (name, "order") VALUES (?, ?)', [name, order || 0]);
+    const result = await db.run('INSERT INTO menus (name, sort_order) VALUES (?, ?)', [name, order || 0]);
     res.json({ id: result.lastID });
   } catch (err) {
     res.status(500).json({error: err.message});
