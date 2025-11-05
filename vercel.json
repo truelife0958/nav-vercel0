@@ -1,12 +1,6 @@
 {
-  "version": 2,
   "buildCommand": "cd web && npm install && npm run build",
   "outputDirectory": "web/dist",
-  "functions": {
-    "api/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
   "rewrites": [
     {
       "source": "/api/:path*",
