@@ -11,6 +11,7 @@ const friendRoutes = require('./routes/friend');
 const userRoutes = require('./routes/user');
 const initRoutes = require('./routes/init');
 const debugRoutes = require('./routes/debug');
+const resetRoutes = require('./routes/reset');
 const compression = require('compression');
 const app = express();
 
@@ -44,6 +45,7 @@ app.use('/api/friends', friendRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/init', initRoutes);
 app.use('/api/debug', debugRoutes);
+app.use('/api/reset', resetRoutes);
 
 // Vercel serverless 导出
 module.exports = app;
