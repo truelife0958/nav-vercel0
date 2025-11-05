@@ -9,6 +9,10 @@ const pool = new Pool({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
 });
 
+// 初始化状态跟踪
+let initPromise = null;
+let isInitialized = false;
+
 // 初始化数据库表
 async function initDatabase() {
   const client = await pool.connect();
@@ -99,6 +103,7 @@ async function initDatabase() {
     await client.query('COMMIT');
     
     console.log('✅ PostgreSQL 数据库初始化完成');
+    isInitialized = true;
   } catch (error) {
     await client.query('ROLLBACK');
     console.error('❌ 数据库初始化失败:', error);
@@ -106,6 +111,19 @@ async function initDatabase() {
   } finally {
     client.release();
   }
+}
+
+// 确保初始化完成
+async function ensureInitialized() {
+  if (isInitialized) {
+    return;
+  }
+  
+  if (!initPromise) {
+    initPromise = initDatabase();
+  }
+  
+  await initPromise;
 }
 
 // 插入默认数据
@@ -164,7 +182,8 @@ async function insertDefaultData(client) {
 // 包装 SQLite 风格的 API
 const db = {
   // 执行查询 (SELECT)
-  all: (sql, params = []) => {
+  all: async (sql, params = []) => {
+    await ensureInitialized();
     let paramIndex = 1;
     const pgSql = sql.replace(/\?/g, () => `$${paramIndex++}`);
     console.log('db.all SQL:', pgSql);
@@ -183,7 +202,8 @@ const db = {
   },
   
   // 执行查询 (单行)
-  get: (sql, params = []) => {
+  get: async (sql, params = []) => {
+    await ensureInitialized();
     let paramIndex = 1;
     const pgSql = sql.replace(/\?/g, () => `$${paramIndex++}`);
     console.log('db.get SQL:', pgSql);
@@ -202,7 +222,8 @@ const db = {
   },
   
   // 执行更新/插入/删除
-  run: (sql, params = []) => {
+  run: async (sql, params = []) => {
+    await ensureInitialized();
     // 将 ? 替换为 $1, $2, $3...
     let paramIndex = 1;
     const pgSql = sql.replace(/\?/g, () => `$${paramIndex++}`);
@@ -232,7 +253,7 @@ const db = {
   }
 };
 
-// 初始化数据库
-initDatabase().catch(console.error);
+// 不再在模块加载时初始化，而是在第一次使用时初始化
+// initDatabase().catch(console.error);
 
 module.exports = db;
