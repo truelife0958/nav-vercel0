@@ -41,6 +41,12 @@ app.use('/api/ads', adRoutes);
 app.use('/api/friends', friendRoutes);
 app.use('/api/users', userRoutes);
 
-app.listen(PORT, () => {
-  console.log(`server is running at http://localhost:${PORT}`);
-}); 
+// Vercel serverless 导出
+module.exports = app;
+
+// 本地开发时启动服务器
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`server is running at http://localhost:${PORT}`);
+  });
+}
