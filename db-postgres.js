@@ -15,10 +15,15 @@ let isInitialized = false;
 
 // 初始化数据库表
 async function initDatabase() {
+  console.log('🔧 initDatabase() 被调用');
+  console.log('连接字符串:', process.env.POSTGRES_URL ? '已设置' : '未设置');
+  
   const client = await pool.connect();
+  console.log('✓ 数据库连接成功');
   
   try {
     await client.query('BEGIN');
+    console.log('✓ 事务开始');
     
     // 创建菜单表
     await client.query(`
@@ -28,6 +33,7 @@ async function initDatabase() {
         sort_order INTEGER DEFAULT 0
       )
     `);
+    console.log('✓ menus 表创建完成');
     await client.query('CREATE INDEX IF NOT EXISTS idx_menus_order ON menus(sort_order)');
     
     // 创建子菜单表
@@ -41,6 +47,7 @@ async function initDatabase() {
       )
     `);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_sub_menus_parent_id ON sub_menus(parent_id)`);
+    console.log('✓ sub_menus 表创建完成');
     await client.query('CREATE INDEX IF NOT EXISTS idx_sub_menus_order ON sub_menus(sort_order)');
     
     // 创建卡片表
@@ -61,6 +68,7 @@ async function initDatabase() {
     `);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_cards_menu_id ON cards(menu_id)`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_cards_sub_menu_id ON cards(sub_menu_id)`);
+    console.log('✓ cards 表创建完成');
     await client.query('CREATE INDEX IF NOT EXISTS idx_cards_order ON cards(sort_order)');
     
     // 创建用户表
@@ -73,6 +81,7 @@ async function initDatabase() {
         last_login_ip TEXT
       )
     `);
+    console.log('✓ users 表创建完成');
     await client.query(`CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)`);
     
     // 创建广告表
@@ -95,6 +104,7 @@ async function initDatabase() {
         logo TEXT
       )
     `);
+    console.log('✓ friends 表创建完成');
     await client.query(`CREATE INDEX IF NOT EXISTS idx_friends_title ON friends(title)`);
     
     // 插入默认数据（在事务提交之前）
@@ -116,14 +126,23 @@ async function initDatabase() {
 // 确保初始化完成
 async function ensureInitialized() {
   if (isInitialized) {
+    console.log('✓ 数据库已初始化');
     return;
   }
+  
+  console.log('⏳ 开始数据库初始化...');
   
   if (!initPromise) {
     initPromise = initDatabase();
   }
   
-  await initPromise;
+  try {
+    await initPromise;
+    console.log('✓ 数据库初始化完成');
+  } catch (err) {
+    console.error('❌ 数据库初始化失败:', err);
+    throw err;
+  }
 }
 
 // 插入默认数据
