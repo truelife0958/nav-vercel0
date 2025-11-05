@@ -57,4 +57,11 @@ export const deleteFriend = (id) => axios.delete(`${BASE}/friends/${id}`, { head
 // 用户API
 export const getUserProfile = () => axios.get(`${BASE}/users/profile`, { headers: authHeaders() });
 export const changePassword = (oldPassword, newPassword) => axios.put(`${BASE}/users/password`, { oldPassword, newPassword }, { headers: authHeaders() });
-export const getUsers = () => axios.get(`${BASE}/users`, { headers: authHeaders() }); 
+export const getUsers = () => axios.get(`${BASE}/users`, { headers: authHeaders() });
+
+// 网站设置API
+export const getSettings = () => axios.get(`${BASE}/settings`);
+export const getSetting = (key) => axios.get(`${BASE}/settings/${key}`);
+export const updateSettings = (settings) => axios.put(`${BASE}/settings`, settings, { headers: authHeaders() });
+export const updateSetting = (key, value, description) => axios.put(`${BASE}/settings/${key}`, { value, description }, { headers: authHeaders() });
+export const deleteSetting = (key) => axios.delete(`${BASE}/settings/${key}`, { headers: authHeaders() });

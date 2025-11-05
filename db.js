@@ -66,6 +66,15 @@ db.serialize(() => {
     logo TEXT
   )`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_friends_title ON friends(title)`);
+  
+  // 网站设置表
+  db.run(`CREATE TABLE IF NOT EXISTS site_settings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    key TEXT UNIQUE NOT NULL,
+    value TEXT,
+    description TEXT
+  )`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_site_settings_key ON site_settings(key)`);
 
   // 检查菜单表是否为空，若为空则插入默认菜单
   db.get('SELECT COUNT(*) as count FROM menus', (err, row) => {
@@ -283,6 +292,23 @@ db.serialize(() => {
       ];
       const stmt = db.prepare('INSERT INTO friends (title, url, logo) VALUES (?, ?, ?)');
       defaultFriends.forEach(([title, url, logo]) => stmt.run(title, url, logo));
+      stmt.finalize();
+    }
+  });
+  
+  // 插入默认网站设置
+  db.get('SELECT COUNT(*) as count FROM site_settings', (err, row) => {
+    if (row && row.count === 0) {
+      const defaultSettings = [
+        ['site_title', 'Nav-Item 导航站', '网站标题'],
+        ['site_subtitle', '您的专属导航', '网站副标题'],
+        ['footer_text', 'Copyright © 2025 Nav-Item', '页脚文字'],
+        ['github_url', 'https://github.com/eooce/Nav-Item', 'GitHub仓库地址'],
+        ['show_admin_entry', 'true', '是否显示管理入口'],
+        ['show_github_link', 'true', '是否显示GitHub链接']
+      ];
+      const stmt = db.prepare('INSERT INTO site_settings (key, value, description) VALUES (?, ?, ?)');
+      defaultSettings.forEach(([key, value, description]) => stmt.run(key, value, description));
       stmt.finalize();
     }
   });

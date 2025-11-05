@@ -1,11 +1,17 @@
 <template>
   <div class="home-container">
-    <div class="menu-bar-fixed">
-      <MenuBar
-        :menus="menus"
-        :activeId="activeMenu?.id"
-        @select="selectMenu"
-      />
+    <!-- 主菜单横向滚动区域 -->
+    <div class="main-menu-scroll-container">
+      <div class="main-menu-scroll-wrapper">
+        <button
+          v-for="menu in menus"
+          :key="menu.id"
+          @click="selectMenu(menu)"
+          :class="['main-menu-btn', {active: menu.id === activeMenu?.id}]"
+        >
+          {{ menu.name }}
+        </button>
+      </div>
     </div>
     
     <div class="search-section">
@@ -79,7 +85,20 @@
           </svg>
           友情链接
         </button>
-        <p class="copyright">Copyright © 2025 Nav-Item | <a href="https://github.com/eooce/Nav-Item" target="_blank" class="footer-link">Powered by eooce</a></p>
+        <a v-if="siteSettings.show_admin_entry === 'true'" href="/admin" class="footer-btn" title="管理后台">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"></path>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"></path>
+          </svg>
+          管理后台
+        </a>
+        <a v-if="siteSettings.show_github_link === 'true'" :href="siteSettings.github_url" target="_blank" class="footer-btn" title="GitHub">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+          GitHub
+        </a>
+        <p class="copyright">{{ siteSettings.footer_text }}</p>
       </div>
     </footer>
 
@@ -127,8 +146,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { getMenus, getCards, getAds, getFriends } from '../api';
-import MenuBar from '../components/MenuBar.vue';
+import { getMenus, getCards, getAds, getFriends, getSettings } from '../api';
 import CardGrid from '../components/CardGrid.vue';
 
 const menus = ref([]);
@@ -140,6 +158,14 @@ const leftAds = ref([]);
 const rightAds = ref([]);
 const showFriendLinks = ref(false);
 const friendLinks = ref([]);
+const siteSettings = ref({
+  site_title: 'Nav-Item 导航站',
+  site_subtitle: '您的专属导航',
+  footer_text: 'Copyright © 2025 Nav-Item',
+  github_url: 'https://github.com/eooce/Nav-Item',
+  show_admin_entry: 'true',
+  show_github_link: 'true'
+});
 
 // 聚合搜索配置
 const searchEngines = [
@@ -193,6 +219,20 @@ const filteredCards = computed(() => {
 });
 
 onMounted(async () => {
+  // 加载网站设置
+  try {
+    const settingsRes = await getSettings();
+    if (settingsRes.data && settingsRes.data.data) {
+      Object.assign(siteSettings.value, settingsRes.data.data);
+      // 更新页面标题
+      if (siteSettings.value.site_title) {
+        document.title = siteSettings.value.site_title;
+      }
+    }
+  } catch (error) {
+    console.error('加载网站设置失败:', error);
+  }
+  
   const res = await getMenus();
   menus.value = res.data;
   if (menus.value.length) {
@@ -268,14 +308,78 @@ function handleCardReorder(newCards) {
 </script>
 
 <style scoped>
-.menu-bar-fixed {
+/* 主菜单横向滚动样式 */
+.main-menu-scroll-container {
   position: fixed;
-  top: .6rem;
+  top: 0.6rem;
   left: 0;
   width: 100vw;
   z-index: 100;
-  /* background: rgba(0,0,0,0.6); /* 可根据需要调整 */
-  /* backdrop-filter: blur(8px);  /*  毛玻璃效果 */
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  padding: 0.5rem 0;
+}
+
+.main-menu-scroll-wrapper {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.main-menu-scroll-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.main-menu-scroll-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.main-menu-scroll-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.main-menu-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.main-menu-btn {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 0.6rem 1.5rem;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.main-menu-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(57, 157, 255, 0.5);
+  color: #399dff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.main-menu-btn.active {
+  background: rgba(57, 157, 255, 0.4);
+  border-color: #399dff;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(57, 157, 255, 0.4);
 }
 
 .search-engine-select {
@@ -557,10 +661,12 @@ function handleCardReorder(newCards) {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 50px;
+  gap: 30px;
+  flex-wrap: wrap;
 }
 
-.friend-link-btn {
+.friend-link-btn,
+.footer-btn {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -571,10 +677,12 @@ function handleCardReorder(newCards) {
   transition: all 0.3s ease;
   font-size: 14px;
   padding: 0;
+  text-decoration: none;
 }
 
-.friend-link-btn:hover {
-  color: #1976d2;
+.friend-link-btn:hover,
+.footer-btn:hover {
+  color: #399dff;
   transform: translateY(-1px);
 }
 
@@ -726,19 +834,6 @@ function handleCardReorder(newCards) {
   margin: 0;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
-.footer-link {
-  color: #ffffffcc;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-.footer-link:hover {
-  color: #1976d2;
-}
-
-:deep(.menu-bar) {
-  position: relative;
-  z-index: 2;
-}
 
 :deep(.card-grid) {
   position: relative;
@@ -815,17 +910,10 @@ function handleCardReorder(newCards) {
   .footer {
     padding-top: 2rem;
   }
-  .friend-link-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: none;
-    border: none;
-    color: rgba(255, 255, 255, 0.8);
-    cursor: pointer;
-    transition: all 0.3s ease;
+  
+  .friend-link-btn,
+  .footer-btn {
     font-size: 0.7rem;
-    padding: 0;
   }
   .copyright {
     color: rgba(255, 255, 255, 0.8);
@@ -847,6 +935,15 @@ function handleCardReorder(newCards) {
   .submenu-btn {
     font-size: 12px;
     padding: 0.4rem 1rem;
+  }
+  
+  .main-menu-btn {
+    font-size: 13px;
+    padding: 0.5rem 1.2rem;
+  }
+  
+  .footer-content {
+    gap: 15px;
   }
 }
 </style> 
