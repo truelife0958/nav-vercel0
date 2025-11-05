@@ -1,62 +1,21 @@
 <template>
   <nav class="menu-bar">
-    <div 
-      v-for="menu in menus" 
-      :key="menu.id" 
-      class="menu-item"
-      @mouseenter="showSubMenu(menu.id)"
-      @mouseleave="hideSubMenu(menu.id)"
+    <button
+      v-for="menu in menus"
+      :key="menu.id"
+      @click="$emit('select', menu)"
+      :class="{active: menu.id === activeId}"
     >
-      <button 
-        @click="$emit('select', menu)" 
-        :class="{active: menu.id === activeId}"
-      >
-        {{ menu.name }}
-      </button>
-      
-      <!-- 二级菜单 -->
-      <div 
-        v-if="menu.subMenus && menu.subMenus.length > 0" 
-        class="sub-menu"
-        :class="{ 'show': hoveredMenuId === menu.id }"
-      >
-        <button 
-          v-for="subMenu in menu.subMenus" 
-          :key="subMenu.id"
-          @click="$emit('select', subMenu, menu)"
-          :class="{active: subMenu.id === activeSubMenuId}"
-          class="sub-menu-item"
-        >
-          {{ subMenu.name }}
-        </button>
-      </div>
-    </div>
+      {{ menu.name }}
+    </button>
   </nav>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-
-const props = defineProps({ 
-  menus: Array, 
-  activeId: Number,
-  activeSubMenuId: Number 
+const props = defineProps({
+  menus: Array,
+  activeId: Number
 });
-
-const hoveredMenuId = ref(null);
-
-function showSubMenu(menuId) {
-  hoveredMenuId.value = menuId;
-}
-
-function hideSubMenu(menuId) {
-  // 延迟隐藏，给用户时间移动到子菜单
-  setTimeout(() => {
-    if (hoveredMenuId.value === menuId) {
-      hoveredMenuId.value = null;
-    }
-  }, 100);
-}
 </script>
 
 <style scoped>
@@ -65,10 +24,6 @@ function hideSubMenu(menuId) {
   justify-content: center;
   flex-wrap: wrap;
   padding: 0 1rem;
-  position: relative;
-}
-
-.menu-item {
   position: relative;
 }
 
@@ -113,64 +68,6 @@ function hideSubMenu(menuId) {
   width: 60%;
 }
 
-/* 二级菜单样式 */
-.sub-menu {
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #5c595900;
-  backdrop-filter: blur(8px);
-  border-radius: 6px;
-  min-width: 120px;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.2s ease;
-  z-index: 1000;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  margin-top: -2px; 
-}
-
-.sub-menu.show {
-  opacity: 1;
-  visibility: visible;
-  transform: translateX(-50%) translateY(2px);
-}
-
-.sub-menu-item {
-  display: block !important;
-  width: 100% !important;
-  text-align: center !important;
-  padding: 0.4rem 1rem !important;
-  border: none !important;
-  background: transparent !important;
-  color: #fff !important;
-  font-size: 14px !important;
-  font-weight: 400 !important;
-  cursor: pointer !important;
-  transition: all 0.2s ease !important;
-  border-radius: 0 !important;
-  text-shadow: none !important;
-  line-height: 1.5 !important;
-}
-
-.sub-menu-item:hover {
-  background: rgba(57, 157, 255, 0.25) !important;
-  color: #399dff !important;
-  transform: none !important;
-}
-
-.sub-menu-item.active {
-  background: rgba(57, 157, 255, 0.35) !important;
-  color: #399dff !important;
-  font-weight: 500 !important;
-}
-
-.sub-menu-item::before {
-  display: none;
-}
-
 @media (max-width: 768px) {
   .menu-bar {
     gap: 0.2rem;
@@ -179,15 +76,6 @@ function hideSubMenu(menuId) {
   .menu-bar button {
     font-size: 14px;
     padding: .4rem .8rem;
-  }
-  
-  .sub-menu {
-    min-width: 100px;
-  }
-  
-  .sub-menu-item {
-    font-size: 8px !important;
-    padding: 0.2rem 0.8rem !important;
   }
 }
 </style> 

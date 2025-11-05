@@ -1,10 +1,9 @@
 <template>
   <div class="home-container">
     <div class="menu-bar-fixed">
-      <MenuBar 
-        :menus="menus" 
-        :activeId="activeMenu?.id" 
-        :activeSubMenuId="activeSubMenu?.id"
+      <MenuBar
+        :menus="menus"
+        :activeId="activeMenu?.id"
         @select="selectMenu"
       />
     </div>
@@ -20,10 +19,10 @@
           </button>
         </div>
         <div class="search-container">
-          <input 
-            v-model="searchQuery" 
-            type="text" 
-            :placeholder="selectedEngine.placeholder" 
+          <input
+            v-model="searchQuery"
+            type="text"
+            :placeholder="selectedEngine.placeholder"
             class="search-input"
             @keyup.enter="handleSearch"
           />
@@ -37,6 +36,23 @@
           </button>
         </div>
       </div>
+      
+      <!-- 子菜单横向滚动区域 -->
+      <div v-if="activeMenu?.subMenus && activeMenu.subMenus.length > 0" class="submenu-scroll-container">
+        <div class="submenu-scroll-wrapper">
+          <button
+            v-for="subMenu in activeMenu.subMenus"
+            :key="subMenu.id"
+            @click="selectSubMenu(subMenu)"
+            :class="['submenu-btn', {active: subMenu.id === activeSubMenu?.id}]"
+          >
+            {{ subMenu.name }}
+          </button>
+        </div>
+      </div>
+      
+      <!-- 分割线 -->
+      <div v-if="activeMenu?.subMenus && activeMenu.subMenus.length > 0" class="divider"></div>
     </div>
     
     <!-- 左侧广告条 -->
@@ -52,7 +68,7 @@
       </a>
     </div>
     
-    <CardGrid :cards="filteredCards"/>
+    <CardGrid :cards="filteredCards" @reorder="handleCardReorder"/>
     
     <footer class="footer">
       <div class="footer-content">
@@ -192,16 +208,14 @@ onMounted(async () => {
   friendLinks.value = friendRes.data;
 });
 
-async function selectMenu(menu, parentMenu = null) {
-  if (parentMenu) {
-    // 选择的是子菜单
-    activeMenu.value = parentMenu;
-    activeSubMenu.value = menu;
-  } else {
-    // 选择的是主菜单
-    activeMenu.value = menu;
-    activeSubMenu.value = null;
-  }
+async function selectMenu(menu) {
+  activeMenu.value = menu;
+  activeSubMenu.value = null;
+  loadCards();
+}
+
+async function selectSubMenu(subMenu) {
+  activeSubMenu.value = subMenu;
   loadCards();
 }
 
@@ -245,6 +259,11 @@ async function handleSearch() {
 function handleLogoError(event) {
   event.target.style.display = 'none';
   event.target.nextElementSibling.style.display = 'flex';
+}
+
+// 处理卡片重新排序（仅在前端更新，不保存到数据库）
+function handleCardReorder(newCards) {
+  cards.value = newCards;
 }
 </script>
 
@@ -369,9 +388,94 @@ function handleLogoError(event) {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2.8rem 0;
+  padding: 2.8rem 0 1rem 0;
   position: relative;
   z-index: 2;
+}
+
+/* 子菜单横向滚动样式 */
+.submenu-scroll-container {
+  width: 100%;
+  max-width: 55rem;
+  margin-top: 1.5rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.submenu-scroll-wrapper {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+.submenu-scroll-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.submenu-scroll-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.submenu-scroll-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.submenu-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.submenu-btn {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 0.5rem 1.2rem;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.submenu-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(57, 157, 255, 0.5);
+  color: #399dff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.submenu-btn.active {
+  background: rgba(57, 157, 255, 0.3);
+  border-color: #399dff;
+  color: #399dff;
+  box-shadow: 0 4px 12px rgba(57, 157, 255, 0.3);
+}
+
+/* 分割线样式 */
+.divider {
+  width: 100%;
+  max-width: 55rem;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3) 20%,
+    rgba(255, 255, 255, 0.3) 80%,
+    transparent
+  );
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .search-box-wrapper {
@@ -734,6 +838,15 @@ function handleLogoError(event) {
     align-items: center;
     justify-content: center;
     gap: 20px;
+  }
+  
+  .submenu-scroll-container {
+    max-width: 95vw;
+  }
+  
+  .submenu-btn {
+    font-size: 12px;
+    padding: 0.4rem 1rem;
   }
 }
 </style> 

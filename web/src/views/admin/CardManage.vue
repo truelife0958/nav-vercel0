@@ -21,6 +21,12 @@
           </svg>
           添加卡片
         </button>
+        <button class="btn btn-secondary" @click="showBatchImport = true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+          </svg>
+          批量导入
+        </button>
       </div>
     </div>
     <div class="card-card">
@@ -55,16 +61,61 @@
       </table>
     </div>
   </div>
+  
+  <!-- 批量导入弹窗 -->
+  <div v-if="showBatchImport" class="modal-overlay" @click="showBatchImport = false">
+    <div class="modal-content" @click.stop>
+      <div class="modal-header">
+        <h3>批量导入卡片</h3>
+        <button @click="showBatchImport = false" class="close-btn">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="import-tabs">
+          <button
+            v-for="tab in importTabs"
+            :key="tab.value"
+            @click="importType = tab.value"
+            :class="['tab-btn', { active: importType === tab.value }]"
+          >
+            {{ tab.label }}
+          </button>
+        </div>
+        <div class="import-content">
+          <div v-if="importType === 'txt'" class="import-hint">
+            格式：每行一个，用 | 分隔<br>
+            示例：标题|网址|描述
+          </div>
+          <div v-else-if="importType === 'html'" class="import-hint">
+            粘贴包含 &lt;a&gt; 标签的 HTML 代码
+          </div>
+          <div v-else class="import-hint">
+            JSON 格式数组，每个对象包含 title, url, logo_url, description
+          </div>
+          <textarea
+            v-model="importContent"
+            class="import-textarea"
+            :placeholder="getImportPlaceholder()"
+          ></textarea>
+          <button class="btn btn-primary" @click="handleBatchImport">
+            开始导入
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue';
-import { 
-  getMenus, 
-  getCards, 
-  addCard as apiAddCard, 
-  updateCard as apiUpdateCard, 
-  deleteCard as apiDeleteCard 
+import {
+  getMenus,
+  getCards,
+  addCard as apiAddCard,
+  updateCard as apiUpdateCard,
+  deleteCard as apiDeleteCard,
+  batchImportCardsJSON,
+  batchImportCardsTXT,
+  batchImportCardsHTML
 } from '../../api';
 
 const menus = ref([]);
@@ -74,6 +125,15 @@ const selectedSubMenuId = ref('');
 const newCardTitle = ref('');
 const newCardUrl = ref('');
 const newCardLogo = ref('');
+const showBatchImport = ref(false);
+const importType = ref('txt');
+const importContent = ref('');
+
+const importTabs = [
+  { label: 'TXT格式', value: 'txt' },
+  { label: 'HTML格式', value: 'html' },
+  { label: 'JSON格式', value: 'json' }
+];
 
 const currentSubMenus = computed(() => {
   if (!selectedMenuId.value) return [];
@@ -142,6 +202,54 @@ async function updateCard(card) {
 async function deleteCard(id) {
   await apiDeleteCard(id);
   loadCards();
+}
+
+function getImportPlaceholder() {
+  if (importType.value === 'txt') {
+    return '标题1|https://example1.com|描述1\n标题2|https://example2.com|描述2';
+  } else if (importType.value === 'html') {
+    return '<a href="https://example.com">示例网站</a>';
+  } else {
+    return '[{"title":"示例","url":"https://example.com","description":"描述"}]';
+  }
+}
+
+async function handleBatchImport() {
+  if (!importContent.value.trim()) {
+    alert('请输入导入内容');
+    return;
+  }
+  
+  try {
+    let result;
+    if (importType.value === 'txt') {
+      result = await batchImportCardsTXT(
+        importContent.value,
+        selectedMenuId.value,
+        selectedSubMenuId.value || null
+      );
+    } else if (importType.value === 'html') {
+      result = await batchImportCardsHTML(
+        importContent.value,
+        selectedMenuId.value,
+        selectedSubMenuId.value || null
+      );
+    } else {
+      const cards = JSON.parse(importContent.value);
+      result = await batchImportCardsJSON(
+        cards,
+        selectedMenuId.value,
+        selectedSubMenuId.value || null
+      );
+    }
+    
+    alert(`成功导入 ${result.data.imported} 个卡片！`);
+    showBatchImport.value = false;
+    importContent.value = '';
+    loadCards();
+  } catch (err) {
+    alert('导入失败：' + err.message);
+  }
 }
 </script>
 
@@ -379,4 +487,127 @@ async function deleteCard(id) {
     width: auto;
   }
 }
-</style> 
+
+/* 批量导入弹窗样式 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  width: 600px;
+  max-width: 90vw;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #111827;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #6b7280;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+}
+
+.close-btn:hover {
+  color: #ef4444;
+}
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.import-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid #e5e7eb;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.tab-btn.active {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.import-hint {
+  background: #f0f9ff;
+  border-left: 4px solid #3b82f6;
+  padding: 12px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+  color: #1e40af;
+  border-radius: 4px;
+}
+
+.import-textarea {
+  width: 100%;
+  min-height: 200px;
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-family: monospace;
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+  resize: vertical;
+}
+
+.import-textarea:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.btn-secondary {
+  background: #10b981;
+}
+
+.btn-secondary:hover {
+  background: #059669;
+}
+
+.btn-primary {
+  width: 100%;
+  justify-content: center;
+}
+</style>

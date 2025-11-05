@@ -19,6 +19,8 @@ export const getSubMenus = (menuId) => axios.get(`${BASE}/menus/${menuId}/submen
 export const addSubMenu = (menuId, data) => axios.post(`${BASE}/menus/${menuId}/submenus`, data, { headers: authHeaders() });
 export const updateSubMenu = (id, data) => axios.put(`${BASE}/menus/submenus/${id}`, data, { headers: authHeaders() });
 export const deleteSubMenu = (id) => axios.delete(`${BASE}/menus/submenus/${id}`, { headers: authHeaders() });
+export const batchDeleteSubMenus = (ids) => axios.post(`${BASE}/menus/submenus/batch-delete`, { ids }, { headers: authHeaders() });
+export const batchMoveSubMenus = (ids, targetParentId) => axios.post(`${BASE}/menus/submenus/batch-move`, { ids, targetParentId }, { headers: authHeaders() });
 
 // 卡片相关API
 export const getCards = (menuId, subMenuId = null) => {
@@ -28,6 +30,11 @@ export const getCards = (menuId, subMenuId = null) => {
 export const addCard = (data) => axios.post(`${BASE}/cards`, data, { headers: authHeaders() });
 export const updateCard = (id, data) => axios.put(`${BASE}/cards/${id}`, data, { headers: authHeaders() });
 export const deleteCard = (id) => axios.delete(`${BASE}/cards/${id}`, { headers: authHeaders() });
+export const batchDeleteCards = (ids) => axios.post(`${BASE}/cards/batch-delete`, { ids }, { headers: authHeaders() });
+export const batchMoveCards = (ids, targetMenuId, targetSubMenuId = null) => axios.post(`${BASE}/cards/batch-move`, { ids, targetMenuId, targetSubMenuId }, { headers: authHeaders() });
+export const batchImportCardsJSON = (cards, menuId, subMenuId = null) => axios.post(`${BASE}/cards/batch-import-json`, { cards, menuId, subMenuId }, { headers: authHeaders() });
+export const batchImportCardsTXT = (content, menuId, subMenuId = null) => axios.post(`${BASE}/cards/batch-import-txt`, { content, menuId, subMenuId }, { headers: authHeaders() });
+export const batchImportCardsHTML = (content, menuId, subMenuId = null) => axios.post(`${BASE}/cards/batch-import-html`, { content, menuId, subMenuId }, { headers: authHeaders() });
 
 export const uploadLogo = (file) => {
   const formData = new FormData();

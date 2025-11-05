@@ -122,4 +122,42 @@ router.delete('/submenus/:id', auth, async (req, res) => {
   }
 });
 
-module.exports = router; 
+// 批量删除子菜单
+router.post('/submenus/batch-delete', auth, async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: '请提供要删除的子菜单ID数组' });
+    }
+    
+    const placeholders = ids.map(() => '?').join(',');
+    const result = await db.run(`DELETE FROM sub_menus WHERE id IN (${placeholders})`, ids);
+    res.json({ deleted: result.changes });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 批量移动子菜单到另一个父菜单
+router.post('/submenus/batch-move', auth, async (req, res) => {
+  try {
+    const { ids, targetParentId } = req.body;
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: '请提供要移动的子菜单ID数组' });
+    }
+    if (!targetParentId) {
+      return res.status(400).json({ error: '请提供目标父菜单ID' });
+    }
+    
+    const placeholders = ids.map(() => '?').join(',');
+    const result = await db.run(
+      `UPDATE sub_menus SET parent_id = ? WHERE id IN (${placeholders})`,
+      [targetParentId, ...ids]
+    );
+    res.json({ updated: result.changes });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+module.exports = router;

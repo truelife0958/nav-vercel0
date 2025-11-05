@@ -1,9 +1,15 @@
 <template>
   <div class="container card-grid" :class="animationClass">
-    <div v-for="(card, index) in cards" :key="card.id" 
-         class="link-item" 
-         :style="getCardStyle(index)">
-      <a :href="card.url" target="_blank" :title="getTooltip(card)">
+    <div v-for="(card, index) in cards" :key="card.id"
+         class="link-item"
+         :class="{ 'dragging': draggingIndex === index, 'drag-over': dragOverIndex === index }"
+         :style="getCardStyle(index)"
+         draggable="true"
+         @dragstart="handleDragStart($event, index)"
+         @dragend="handleDragEnd"
+         @dragover.prevent="handleDragOver($event, index)"
+         @drop="handleDrop($event, index)">
+      <a :href="card.url" target="_blank" :title="getTooltip(card)" @click="handleLinkClick">
         <img class="link-icon" :src="getLogo(card)" alt="" @error="onImgError($event, card)" loading="lazy">
         <span class="link-text">{{ truncate(card.title) }}</span>
       </a>
@@ -15,6 +21,62 @@
 import { ref, watch, nextTick } from 'vue';
 
 const props = defineProps({ cards: Array });
+const emit = defineEmits(['reorder']);
+
+// 拖拽相关状态
+const draggingIndex = ref(null);
+const dragOverIndex = ref(null);
+const isDragging = ref(false);
+
+// 拖拽处理函数
+function handleDragStart(e, index) {
+  draggingIndex.value = index;
+  isDragging.value = true;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', index);
+  // 添加半透明效果
+  setTimeout(() => {
+    e.target.style.opacity = '0.5';
+  }, 0);
+}
+
+function handleDragEnd(e) {
+  e.target.style.opacity = '1';
+  draggingIndex.value = null;
+  dragOverIndex.value = null;
+  isDragging.value = false;
+}
+
+function handleDragOver(e, index) {
+  if (draggingIndex.value !== null && draggingIndex.value !== index) {
+    dragOverIndex.value = index;
+  }
+}
+
+function handleDrop(e, dropIndex) {
+  e.preventDefault();
+  const dragIndex = draggingIndex.value;
+  
+  if (dragIndex !== null && dragIndex !== dropIndex) {
+    // 重新排序卡片
+    const newCards = [...props.cards];
+    const draggedCard = newCards[dragIndex];
+    newCards.splice(dragIndex, 1);
+    newCards.splice(dropIndex, 0, draggedCard);
+    
+    // 通知父组件更新顺序
+    emit('reorder', newCards);
+  }
+  
+  dragOverIndex.value = null;
+}
+
+function handleLinkClick(e) {
+  // 如果正在拖拽，阻止链接跳转
+  if (isDragging.value) {
+    e.preventDefault();
+  }
+}
 
 // 动画状态
 const animationClass = ref('');
@@ -187,11 +249,24 @@ function truncate(str) {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  cursor: move;
+  position: relative;
 }
+
 .link-item:hover {
   background-color: rgba(255, 255, 255, 0.3);
   transform: translateY(-2px);
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.link-item.dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+}
+
+.link-item.drag-over {
+  border: 2px dashed #399dff;
+  background-color: rgba(57, 157, 255, 0.2);
 }
 .link-item a {
   /* margin-top: 8px; */
