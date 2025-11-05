@@ -165,13 +165,17 @@ async function insertDefaultData(client) {
 const db = {
   // 执行查询 (SELECT)
   all: (sql, params = []) => {
-    return pool.query(sql.replace(/\?/g, (match, offset) => `$${params.slice(0, offset).filter(p => p === '?').length + 1}`), params)
+    let paramIndex = 1;
+    const pgSql = sql.replace(/\?/g, () => `$${paramIndex++}`);
+    return pool.query(pgSql, params)
       .then(result => result.rows);
   },
   
   // 执行查询 (单行)
   get: (sql, params = []) => {
-    return pool.query(sql.replace(/\?/g, (match, offset) => `$${params.slice(0, offset).filter(p => p === '?').length + 1}`), params)
+    let paramIndex = 1;
+    const pgSql = sql.replace(/\?/g, () => `$${paramIndex++}`);
+    return pool.query(pgSql, params)
       .then(result => result.rows[0]);
   },
   
