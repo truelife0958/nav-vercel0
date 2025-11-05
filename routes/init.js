@@ -15,8 +15,10 @@ router.post('/database', async (req, res) => {
   const client = await pool.connect();
   
   try {
+    await client.query('BEGIN');
+    
     // 检查并插入默认菜单
-    const menuCount = await client.query('SELECT COUNT(*) as count FROM menus');
+    let menuCount = await client.query('SELECT COUNT(*) as count FROM menus');
     if (parseInt(menuCount.rows[0].count) === 0) {
       const defaultMenus = [
         ['Home', 1],
@@ -34,8 +36,11 @@ router.post('/database', async (req, res) => {
       console.log('✅ 默认菜单插入完成');
     }
     
+    // 重新查询菜单数量
+    menuCount = await client.query('SELECT COUNT(*) as count FROM menus');
+    
     // 检查并插入默认管理员
-    const userCount = await client.query('SELECT COUNT(*) as count FROM users');
+    let userCount = await client.query('SELECT COUNT(*) as count FROM users');
     if (parseInt(userCount.rows[0].count) === 0) {
       const passwordHash = await bcrypt.hash(config.admin.password, 10);
       await client.query('INSERT INTO users (username, password) VALUES ($1, $2)', [
@@ -46,8 +51,11 @@ router.post('/database', async (req, res) => {
       console.log('✅ 默认管理员账号创建完成');
     }
     
+    // 重新查询用户数量
+    userCount = await client.query('SELECT COUNT(*) as count FROM users');
+    
     // 检查并插入默认友情链接
-    const friendCount = await client.query('SELECT COUNT(*) as count FROM friends');
+    let friendCount = await client.query('SELECT COUNT(*) as count FROM friends');
     if (parseInt(friendCount.rows[0].count) === 0) {
       const defaultFriends = [
         ['Nodeseek图床', 'https://www.nodeimage.com', 'https://www.nodeseek.com/static/image/favicon/favicon-32x32.png'],
@@ -60,6 +68,11 @@ router.post('/database', async (req, res) => {
       
       console.log('✅ 默认友情链接插入完成');
     }
+    
+    // 重新查询友情链接数量
+    friendCount = await client.query('SELECT COUNT(*) as count FROM friends');
+    
+    await client.query('COMMIT');
     
     res.json({
       success: true,

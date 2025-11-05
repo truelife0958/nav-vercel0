@@ -93,10 +93,10 @@ async function initDatabase() {
     `);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_friends_title ON friends(title)`);
     
-    await client.query('COMMIT');
-    
-    // 插入默认数据
+    // 插入默认数据（在事务提交之前）
     await insertDefaultData(client);
+    
+    await client.query('COMMIT');
     
     console.log('✅ PostgreSQL 数据库初始化完成');
   } catch (error) {
