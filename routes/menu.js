@@ -9,12 +9,12 @@ router.get('/', async (req, res) => {
     const { page, pageSize } = req.query;
     if (!page && !pageSize) {
       // 获取主菜单
-      const menus = await db.all('SELECT * FROM menus ORDER BY "order"', []);
+      const menus = await db.all('SELECT * FROM menus ORDER BY sort_order', []);
       
       // 为每个主菜单获取子菜单
       const menusWithSubMenus = await Promise.all(menus.map(async (menu) => {
         try {
-          const subMenus = await db.all('SELECT * FROM sub_menus WHERE parent_id = ? ORDER BY "order"', [menu.id]);
+          const subMenus = await db.all('SELECT * FROM sub_menus WHERE parent_id = ? ORDER BY sort_order', [menu.id]);
           return { ...menu, subMenus };
         } catch (err) {
           console.error('获取子菜单失败:', err);

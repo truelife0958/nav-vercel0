@@ -21,10 +21,10 @@ async function initDatabase() {
       CREATE TABLE IF NOT EXISTS menus (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL,
-        "order" INTEGER DEFAULT 0
+        sort_order INTEGER DEFAULT 0
       )
     `);
-    await client.query('CREATE INDEX IF NOT EXISTS idx_menus_order ON menus("order")');
+    await client.query('CREATE INDEX IF NOT EXISTS idx_menus_order ON menus(sort_order)');
     
     // 创建子菜单表
     await client.query(`
@@ -32,12 +32,12 @@ async function initDatabase() {
         id SERIAL PRIMARY KEY,
         parent_id INTEGER NOT NULL,
         name TEXT NOT NULL,
-        "order" INTEGER DEFAULT 0,
+        sort_order INTEGER DEFAULT 0,
         FOREIGN KEY(parent_id) REFERENCES menus(id) ON DELETE CASCADE
       )
     `);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_sub_menus_parent_id ON sub_menus(parent_id)`);
-    await client.query('CREATE INDEX IF NOT EXISTS idx_sub_menus_order ON sub_menus("order")');
+    await client.query('CREATE INDEX IF NOT EXISTS idx_sub_menus_order ON sub_menus(sort_order)');
     
     // 创建卡片表
     await client.query(`
@@ -49,15 +49,15 @@ async function initDatabase() {
         url TEXT NOT NULL,
         logo_url TEXT,
         custom_logo_path TEXT,
-        "desc" TEXT,
-        "order" INTEGER DEFAULT 0,
+        description TEXT,
+        sort_order INTEGER DEFAULT 0,
         FOREIGN KEY(menu_id) REFERENCES menus(id) ON DELETE CASCADE,
         FOREIGN KEY(sub_menu_id) REFERENCES sub_menus(id) ON DELETE CASCADE
       )
     `);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_cards_menu_id ON cards(menu_id)`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_cards_sub_menu_id ON cards(sub_menu_id)`);
-    await client.query('CREATE INDEX IF NOT EXISTS idx_cards_order ON cards("order")');
+    await client.query('CREATE INDEX IF NOT EXISTS idx_cards_order ON cards(sort_order)');
     
     // 创建用户表
     await client.query(`
@@ -124,7 +124,7 @@ async function insertDefaultData(client) {
       ];
       
       for (const [name, order] of defaultMenus) {
-        await client.query('INSERT INTO menus (name, "order") VALUES ($1, $2)', [name, order]);
+        await client.query('INSERT INTO menus (name, sort_order) VALUES ($1, $2)', [name, order]);
       }
       
       console.log('✅ 默认菜单插入完成');
