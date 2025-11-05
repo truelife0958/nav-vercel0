@@ -29,26 +29,46 @@ function getShanghaiTime() {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
-router.post('/login', (req, res) => {
-  const { username, password } = req.body;
-  db.get('SELECT * FROM users WHERE username=?', [username], (err, user) => {
-    if (err || !user) return res.status(401).json({ error: '用户名或密码错误' });
-    bcrypt.compare(password, user.password, (err, result) => {
-      if (result) {
-        // 记录上次登录时间和IP
-        const lastLoginTime = user.last_login_time;
-        const lastLoginIp = user.last_login_ip;
-        // 更新为本次登录（上海时间）
-        const now = getShanghaiTime();
-        const ip = getClientIp(req);
-        db.run('UPDATE users SET last_login_time=?, last_login_ip=? WHERE id=?', [now, ip, user.id]);
-        const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '2h' });
-        res.json({ token, lastLoginTime, lastLoginIp });
-      } else {
-        res.status(401).json({ error: '用户名或密码错误' });
-      }
-    });
-  });
+router.post('/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    
+    console.log('登录请求:', username);
+    
+    const user = await db.get('SELECT * FROM users WHERE username=?', [username]);
+    
+    if (!user) {
+      console.log('用户不存在:', username);
+      return res.status(401).json({ error: '用户名或密码错误' });
+    }
+    
+    console.log('找到用户:', user.username);
+    
+    const result = await bcrypt.compare(password, user.password);
+    
+    if (result) {
+      // 记录上次登录时间和IP
+      const lastLoginTime = user.last_login_time;
+      const lastLoginIp = user.last_login_ip;
+      
+      // 更新为本次登录（上海时间）
+      const now = getShanghaiTime();
+      const ip = getClientIp(req);
+      
+      await db.run('UPDATE users SET last_login_time=?, last_login_ip=? WHERE id=?', [now, ip, user.id]);
+      
+      const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '2h' });
+      
+      console.log('登录成功:', username);
+      res.json({ token, lastLoginTime, lastLoginIp });
+    } else {
+      console.log('密码错误:', username);
+      res.status(401).json({ error: '用户名或密码错误' });
+    }
+  } catch (err) {
+    console.error('登录失败:', err);
+    res.status(500).json({ error: '登录失败: ' + err.message });
+  }
 });
 
 module.exports = router; 
