@@ -32,16 +32,11 @@ router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
     
-    console.log('登录请求:', username);
-    
     const user = await db.get('SELECT * FROM users WHERE username=?', [username]);
     
     if (!user) {
-      console.log('用户不存在:', username);
       return res.status(401).json({ error: '用户名或密码错误' });
     }
-    
-    console.log('找到用户:', user.username);
     
     const result = await bcrypt.compare(password, user.password);
     
@@ -56,12 +51,11 @@ router.post('/login', async (req, res) => {
       
       await db.run('UPDATE users SET last_login_time=?, last_login_ip=? WHERE id=?', [now, ip, user.id]);
       
-      const token = jwt.sign({ id: user.id, username: user.username }, config.server.jwtSecret, { expiresIn: '2h' });
+      // 延长token有效期到7天
+      const token = jwt.sign({ id: user.id, username: user.username }, config.server.jwtSecret, { expiresIn: '7d' });
       
-      console.log('登录成功:', username);
       res.json({ token, lastLoginTime, lastLoginIp });
     } else {
-      console.log('密码错误:', username);
       res.status(401).json({ error: '用户名或密码错误' });
     }
   } catch (err) {

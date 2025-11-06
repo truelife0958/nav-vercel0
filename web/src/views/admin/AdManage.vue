@@ -252,8 +252,8 @@ async function deleteAd(id) {
   }
   .ad-section {
     width: 92%;
-    padding-top: 10rem;
-    margin-bottom: -8rem;
+    padding-top: 2rem;
+    margin-bottom: 2rem;
   }
   .ad-card {
     width: 100%;

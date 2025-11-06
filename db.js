@@ -15,20 +15,20 @@ db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS menus (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    "order" INTEGER DEFAULT 0
+    sort_order INTEGER DEFAULT 0
   )`);
-  db.run(`CREATE INDEX IF NOT EXISTS idx_menus_order ON menus("order")`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_menus_order ON menus(sort_order)`);
   
   // 添加子菜单表
   db.run(`CREATE TABLE IF NOT EXISTS sub_menus (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     parent_id INTEGER NOT NULL,
     name TEXT NOT NULL,
-    "order" INTEGER DEFAULT 0,
+    sort_order INTEGER DEFAULT 0,
     FOREIGN KEY(parent_id) REFERENCES menus(id) ON DELETE CASCADE
   )`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_sub_menus_parent_id ON sub_menus(parent_id)`);
-  db.run(`CREATE INDEX IF NOT EXISTS idx_sub_menus_order ON sub_menus("order")`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_sub_menus_order ON sub_menus(sort_order)`);
   
   db.run(`CREATE TABLE IF NOT EXISTS cards (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -38,14 +38,14 @@ db.serialize(() => {
     url TEXT NOT NULL,
     logo_url TEXT,
     custom_logo_path TEXT,
-    desc TEXT,
-    "order" INTEGER DEFAULT 0,
+    description TEXT,
+    sort_order INTEGER DEFAULT 0,
     FOREIGN KEY(menu_id) REFERENCES menus(id) ON DELETE CASCADE,
     FOREIGN KEY(sub_menu_id) REFERENCES sub_menus(id) ON DELETE CASCADE
   )`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_cards_menu_id ON cards(menu_id)`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_cards_sub_menu_id ON cards(sub_menu_id)`);
-  db.run(`CREATE INDEX IF NOT EXISTS idx_cards_order ON cards("order")`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_cards_order ON cards(sort_order)`);
   db.run(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
@@ -87,7 +87,7 @@ db.serialize(() => {
         ['Tools', 5],
         ['Other', 6]
       ];
-      const stmt = db.prepare('INSERT INTO menus (name, "order") VALUES (?, ?)');
+      const stmt = db.prepare('INSERT INTO menus (name, sort_order) VALUES (?, ?)');
       defaultMenus.forEach(([name, order]) => stmt.run(name, order));
       stmt.finalize(() => {
         // 确保菜单插入完成后再插入子菜单和卡片
@@ -99,7 +99,7 @@ db.serialize(() => {
 
   // 插入默认子菜单和卡片的函数
   function insertDefaultSubMenusAndCards() {
-    db.all('SELECT * FROM menus ORDER BY "order"', (err, menus) => {
+    db.all('SELECT * FROM menus ORDER BY sort_order', (err, menus) => {
       if (err) {
         console.error('获取菜单失败:', err);
         return;
@@ -126,7 +126,7 @@ db.serialize(() => {
           { parentMenu: 'Software', name: 'Windows', order: 4 }
         ];
         
-        const subMenuStmt = db.prepare('INSERT INTO sub_menus (parent_id, name, "order") VALUES (?, ?, ?)');
+        const subMenuStmt = db.prepare('INSERT INTO sub_menus (parent_id, name, sort_order) VALUES (?, ?, ?)');
         let subMenuInsertCount = 0;
         const subMenuMap = {};
         
@@ -223,7 +223,7 @@ db.serialize(() => {
             { menu: 'Other', title: '10分钟临时邮箱', url: 'https://linshiyouxiang.net', logo_url: 'https://linshiyouxiang.net/static/index/zh/images/favicon.ico', desc: '10分钟临时邮箱' },
           ];
           
-          const cardStmt = db.prepare('INSERT INTO cards (menu_id, sub_menu_id, title, url, logo_url, desc) VALUES (?, ?, ?, ?, ?, ?)');
+          const cardStmt = db.prepare('INSERT INTO cards (menu_id, sub_menu_id, title, url, logo_url, description, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)');
           let cardInsertCount = 0;
           
           cards.forEach(card => {
@@ -239,7 +239,7 @@ db.serialize(() => {
               }
               
               if (subMenuId) {
-                cardStmt.run(null, subMenuId, card.title, card.url, card.logo_url, card.desc, function(err) {
+                cardStmt.run(null, subMenuId, card.title, card.url, card.logo_url, card.desc || '', 0, function(err) {
                   if (err) {
                     console.error(`插入子菜单卡片失败 [${card.subMenu}] ${card.title}:`, err);
                   } else {
@@ -252,7 +252,7 @@ db.serialize(() => {
               }
             } else if (menuMap[card.menu]) {
               // 插入主菜单卡片
-              cardStmt.run(menuMap[card.menu], null, card.title, card.url, card.logo_url, card.desc, function(err) {
+              cardStmt.run(menuMap[card.menu], null, card.title, card.url, card.logo_url, card.desc || '', 0, function(err) {
                 if (err) {
                   console.error(`插入卡片失败 [${card.menu}] ${card.title}:`, err);
                 } else {
