@@ -21,18 +21,33 @@ const props = defineProps({
 <style scoped>
 .menu-bar {
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
   overflow-x: auto;
   overflow-y: hidden;
   padding: 0 1rem;
   position: relative;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(57, 157, 255, 0.3) transparent;
   scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  gap: 0.5rem;
 }
 
 .menu-bar::-webkit-scrollbar {
-  display: none;
+  height: 4px;
+}
+
+.menu-bar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.menu-bar::-webkit-scrollbar-thumb {
+  background: rgba(57, 157, 255, 0.3);
+  border-radius: 2px;
+}
+
+.menu-bar::-webkit-scrollbar-thumb:hover {
+  background: rgba(57, 157, 255, 0.5);
 }
 
 .menu-bar button {
@@ -49,6 +64,8 @@ const props = defineProps({
   border-radius: 8px;
   position: relative;
   overflow: hidden;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .menu-bar button::before {

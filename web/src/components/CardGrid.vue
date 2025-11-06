@@ -230,6 +230,7 @@ function truncate(str) {
   opacity: 1;
   transition: opacity 0.2s ease;
   justify-content: center;
+  justify-items: center;
   padding: 0 1rem;
   box-sizing: border-box;
 }

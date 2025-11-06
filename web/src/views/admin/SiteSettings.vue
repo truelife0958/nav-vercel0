@@ -84,6 +84,51 @@
       </div>
     </div>
     
+    <div class="settings-card">
+      <h3 class="settings-title">密码管理</h3>
+      <div class="settings-form">
+        <div class="form-group">
+          <label class="form-label">当前密码</label>
+          <input
+            v-model="passwordForm.oldPassword"
+            type="password"
+            class="form-input"
+            placeholder="请输入当前密码"
+          />
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">新密码</label>
+          <input
+            v-model="passwordForm.newPassword"
+            type="password"
+            class="form-input"
+            placeholder="请输入新密码（至少6位）"
+          />
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">确认新密码</label>
+          <input
+            v-model="passwordForm.confirmPassword"
+            type="password"
+            class="form-input"
+            placeholder="请再次输入新密码"
+          />
+        </div>
+        
+        <div class="form-actions">
+          <button @click="changePassword" class="btn btn-primary" :disabled="changingPassword">
+            {{ changingPassword ? '修改中...' : '修改密码' }}
+          </button>
+        </div>
+        
+        <div v-if="passwordMessage" :class="['message', passwordMessageType]">
+          {{ passwordMessage }}
+        </div>
+      </div>
+    </div>
+    
     <div class="settings-info">
       <h4>设置说明</h4>
       <ul>
@@ -100,7 +145,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { getSettings, updateSettings } from '../../api';
+import { getSettings, updateSettings, changePassword as apiChangePassword } from '../../api';
 
 const settings = ref({
   site_title: '',
@@ -111,9 +156,18 @@ const settings = ref({
   show_github_link: 'true'
 });
 
+const passwordForm = ref({
+  oldPassword: '',
+  newPassword: '',
+  confirmPassword: ''
+});
+
 const saving = ref(false);
 const message = ref('');
 const messageType = ref('success');
+const changingPassword = ref(false);
+const passwordMessage = ref('');
+const passwordMessageType = ref('success');
 
 onMounted(() => {
   loadSettings();
@@ -146,12 +200,61 @@ async function saveSettings() {
   }
 }
 
+async function changePassword() {
+  if (!passwordForm.value.oldPassword || !passwordForm.value.newPassword || !passwordForm.value.confirmPassword) {
+    showPasswordMessage('请填写所有密码字段', 'error');
+    return;
+  }
+  
+  if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
+    showPasswordMessage('两次输入的新密码不一致', 'error');
+    return;
+  }
+  
+  if (passwordForm.value.newPassword.length < 6) {
+    showPasswordMessage('新密码长度至少6位', 'error');
+    return;
+  }
+  
+  changingPassword.value = true;
+  passwordMessage.value = '';
+  
+  try {
+    await apiChangePassword(passwordForm.value.oldPassword, passwordForm.value.newPassword);
+    showPasswordMessage('密码修改成功，2秒后将自动退出登录', 'success');
+    passwordForm.value = {
+      oldPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    };
+    
+    setTimeout(() => {
+      localStorage.removeItem('token');
+      window.location.reload();
+    }, 2000);
+  } catch (error) {
+    showPasswordMessage(error.response?.data?.message || '密码修改失败', 'error');
+  } finally {
+    changingPassword.value = false;
+  }
+}
+
 function showMessage(msg, type = 'success') {
   message.value = msg;
   messageType.value = type;
   setTimeout(() => {
     message.value = '';
   }, 3000);
+}
+
+function showPasswordMessage(msg, type = 'success') {
+  passwordMessage.value = msg;
+  passwordMessageType.value = type;
+  if (type === 'error') {
+    setTimeout(() => {
+      passwordMessage.value = '';
+    }, 3000);
+  }
 }
 </script>
 

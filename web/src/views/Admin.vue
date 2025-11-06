@@ -43,7 +43,6 @@
         <li :class="{active: page==='friend'}" @click="page='friend'; closeSider()">友链管理</li>
         <li :class="{active: page==='stats'}" @click="page='stats'; closeSider()">访问统计</li>
         <li :class="{active: page==='export'}" @click="page='export'; closeSider()">数据导出</li>
-        <li :class="{active: page==='user'}" @click="page='user'; closeSider()">用户管理</li>
         <li :class="{active: page==='settings'}" @click="page='settings'; closeSider()">网站设置</li>
       </ul>
     </aside>
@@ -86,7 +85,6 @@
         <FriendLinkManage v-if="page==='friend'" />
         <StatsManage v-if="page==='stats'" />
         <DataExport v-if="page==='export'" />
-        <UserManage v-if="page==='user'" />
         <SiteSettings v-if="page==='settings'" />
       </div>
       <footer class="admin-footer">
@@ -105,7 +103,6 @@ import AdManage from './admin/AdManage.vue';
 import FriendLinkManage from './admin/FriendLinkManage.vue';
 import StatsManage from './admin/StatsManage.vue';
 import DataExport from './admin/DataExport.vue';
-import UserManage from './admin/UserManage.vue';
 import SiteSettings from './admin/SiteSettings.vue';
 
 const page = ref('welcome');
@@ -127,7 +124,6 @@ const pageTitle = computed(() => {
     case 'friend': return '友链管理';
     case 'stats': return '访问统计';
     case 'export': return '数据导出';
-    case 'user': return '用户管理';
     case 'settings': return '网站设置';
     default: return '';
   }

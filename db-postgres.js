@@ -107,6 +107,19 @@ async function initDatabase() {
     console.log('✓ friends 表创建完成');
     await client.query(`CREATE INDEX IF NOT EXISTS idx_friends_title ON friends(title)`);
     
+    // 创建网站设置表
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS site_settings (
+        id SERIAL PRIMARY KEY,
+        key TEXT UNIQUE NOT NULL,
+        value TEXT,
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('✓ site_settings 表创建完成');
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_site_settings_key ON site_settings(key)`);
+    
     // 插入默认数据（在事务提交之前）
     await insertDefaultData(client);
     
@@ -192,6 +205,25 @@ async function insertDefaultData(client) {
       }
       
       console.log('✅ 默认友情链接插入完成');
+    }
+    
+    // 检查网站设置表是否为空
+    const settingsCount = await client.query('SELECT COUNT(*) as count FROM site_settings');
+    if (parseInt(settingsCount.rows[0].count) === 0) {
+      const defaultSettings = [
+        ['site_title', 'Nav-Item 导航站', '网站标题'],
+        ['site_subtitle', '您的专属导航', '网站副标题'],
+        ['footer_text', 'Copyright © 2025 Nav-Item', '页脚文字'],
+        ['github_url', 'https://github.com/eooce/Nav-Item', 'GitHub仓库地址'],
+        ['show_admin_entry', 'true', '是否显示管理入口'],
+        ['show_github_link', 'true', '是否显示GitHub链接']
+      ];
+      
+      for (const [key, value, description] of defaultSettings) {
+        await client.query('INSERT INTO site_settings (key, value, description) VALUES ($1, $2, $3)', [key, value, description]);
+      }
+      
+      console.log('✅ 默认网站设置插入完成');
     }
   } catch (error) {
     console.error('插入默认数据失败:', error);

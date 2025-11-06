@@ -25,6 +25,9 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
+// 信任代理 - 在Vercel等代理环境下必须启用
+app.set('trust proxy', true);
+
 // 安全性中间件 - Helmet
 app.use(helmet({
   contentSecurityPolicy: false, // 根据需要配置CSP
@@ -41,7 +44,13 @@ app.use(cors({
     // 允许没有origin的请求（如移动应用或curl）
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.indexOf(origin) === -1 && process.env.NODE_ENV === 'production') {
+    // 开发环境允许所有源
+    if (process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
+    
+    // 生产环境检查白名单
+    if (allowedOrigins.indexOf(origin) === -1) {
       const msg = 'CORS policy: Origin not allowed';
       return callback(new Error(msg), false);
     }

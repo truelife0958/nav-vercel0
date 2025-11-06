@@ -1,14 +1,26 @@
 <template>
   <div class="ad-manage">
-    <div class="ad-header">
-      <form class="ad-add-row" @submit.prevent="handleAddAd">
-        <input v-model="newAdImg" placeholder="广告图片链接" class="input" />
-        <input v-model="newAdUrl" placeholder="广告跳转链接" class="input" />
-        <select v-model="newAdPos" class="input select-input">
-          <option value="left">左侧广告</option>
-          <option value="right">右侧广告</option>
-        </select>
-        <button class="btn" type="submit">添加广告</button>
+    <div class="ad-settings-card">
+      <h3 class="settings-title">广告设置</h3>
+      <form class="ad-add-form" @submit.prevent="handleAddAd">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">广告图片链接</label>
+            <input v-model="newAdImg" placeholder="https://example.com/ad.jpg" class="input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">广告跳转链接</label>
+            <input v-model="newAdUrl" placeholder="https://example.com" class="input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">广告位置</label>
+            <select v-model="newAdPos" class="input select-input">
+              <option value="left">左侧广告</option>
+              <option value="right">右侧广告</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-add" type="submit">添加广告</button>
       </form>
     </div>
     <div class="ad-section">
@@ -87,24 +99,55 @@ async function deleteAd(id) {
   width: 90%;
   margin: 0 auto;
 }
-.page-title {
-  text-align: center;
-  font-size: 2rem;
-  font-weight: bold;
-  margin: 32px 0 32px 0;
-  letter-spacing: 2px;
-  color: #222;
+
+.ad-settings-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 24px 32px;
+  margin-bottom: 32px;
 }
+
+.settings-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #222;
+  margin: 0 0 20px 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.ad-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 2fr 2fr 1fr;
+  gap: 16px;
+  align-items: end;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
 .section-title {
   text-align: left;
   font-size: 1.2rem;
   font-weight: bold;
   margin-bottom: 12px;
   color: #2566d8;
-}
-.ad-header {
-  height: 32px;
-  margin-bottom: 64px;
 }
 .ad-section {
   margin-bottom: 32px;
@@ -132,18 +175,26 @@ async function deleteAd(id) {
 .input:focus {
   outline: 2px solid #2566d8;
 }
+
 .btn {
   background: #2566d8;
   color: #fff;
   border: none;
-  border-radius: 4px;
-  padding: 8px 18px;
+  border-radius: 8px;
+  padding: 10px 24px;
   cursor: pointer;
-  margin-right: 8px;
+  font-size: 15px;
+  font-weight: 500;
   transition: background 0.2s;
 }
+
 .btn:hover {
   background: #174ea6;
+}
+
+.btn-add {
+  align-self: flex-start;
+  padding: 10px 32px;
 }
 .btn-danger {
   background: #e74c3c;
@@ -209,46 +260,26 @@ async function deleteAd(id) {
   margin-bottom: 12px;
   width: 100%;
 }
-.ad-add-block .btn {
-  width: 100%;
-  font-size: 1rem;
-  padding: 10px 0;
-}
-.ad-add-row {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  align-items: center;
-  background: linear-gradient(135deg,#667eea,#764ba2);
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-  padding: 24px 32px 16px 32px;
-  min-width: 600px;
-}
 .select-input {
-  min-width: 120px;
-  height: 38px;
-}
-.ad-add-row input[type="text"], .ad-add-row input.input {
-  width: 18rem !important;
-  min-width: 200px;
-  max-width: 100%;
+  height: 42px;
 }
 @media (max-width: 768px) {
-  .admin-content{
-    width: 92%;
-  }
   .ad-manage {
     width: 100%;
     padding: 0 2vw;
   }
-  .ad-header, .ad-add-row {
-    flex-direction: column;
-    gap: 8px;
-    min-width: 0;
-    width: 92%;
-    margin: 0 auto;
-    padding: 8px 0 !important;
+  
+  .ad-settings-card {
+    padding: 20px 16px;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .btn-add {
+    width: 100%;
   }
   .ad-section {
     width: 92%;
