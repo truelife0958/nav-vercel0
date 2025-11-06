@@ -18,6 +18,7 @@ const initRoutes = require('./routes/init');
 const debugRoutes = require('./routes/debug');
 const resetRoutes = require('./routes/reset');
 const createAdminRoutes = require('./routes/create-admin');
+const resetAdminPasswordRoutes = require('./routes/reset-admin-password');
 const exportRoutes = require('./routes/export');
 const statsRoutes = require('./routes/stats');
 const compression = require('compression');
@@ -127,6 +128,7 @@ app.use('/api/init', initRoutes);
 app.use('/api/debug', debugRoutes);
 app.use('/api/reset', resetRoutes);
 app.use('/api/create-admin', createAdminRoutes);
+app.use('/api', resetAdminPasswordRoutes);
 app.use('/api/export', exportRoutes);
 app.use('/api/stats', statsRoutes);
 
