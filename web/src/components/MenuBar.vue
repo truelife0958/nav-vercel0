@@ -21,10 +21,18 @@ const props = defineProps({
 <style scoped>
 .menu-bar {
   display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
+  justify-content: flex-start;
+  overflow-x: auto;
+  overflow-y: hidden;
   padding: 0 1rem;
   position: relative;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-behavior: smooth;
+}
+
+.menu-bar::-webkit-scrollbar {
+  display: none;
 }
 
 .menu-bar button {

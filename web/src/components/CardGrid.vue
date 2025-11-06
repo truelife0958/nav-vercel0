@@ -220,6 +220,9 @@ function truncate(str) {
   gap: 15px;
   opacity: 1;
   transition: opacity 0.2s ease;
+  justify-content: center;
+  padding: 0 1rem;
+  box-sizing: border-box;
 }
 @media (max-width: 1200px) {
   .container {
