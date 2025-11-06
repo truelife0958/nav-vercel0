@@ -65,3 +65,16 @@ export const getSetting = (key) => axios.get(`${BASE}/settings/${key}`);
 export const updateSettings = (settings) => axios.put(`${BASE}/settings`, settings, { headers: authHeaders() });
 export const updateSetting = (key, value, description) => axios.put(`${BASE}/settings/${key}`, { value, description }, { headers: authHeaders() });
 export const deleteSetting = (key) => axios.delete(`${BASE}/settings/${key}`, { headers: authHeaders() });
+
+// 数据导出API
+export const exportDataJSON = () => axios.get(`${BASE}/export/json`, { headers: authHeaders() });
+export const exportCardsCSV = () => axios.get(`${BASE}/export/csv/cards`, { headers: authHeaders(), responseType: 'blob' });
+export const exportMenusCSV = () => axios.get(`${BASE}/export/csv/menus`, { headers: authHeaders(), responseType: 'blob' });
+export const exportFriendsCSV = () => axios.get(`${BASE}/export/csv/friends`, { headers: authHeaders(), responseType: 'blob' });
+
+// 统计API
+export const recordClick = (cardId) => axios.post(`${BASE}/stats/click/${cardId}`);
+export const getPopularCards = (limit = 10, days = 30) => axios.get(`${BASE}/stats/popular`, { params: { limit, days } });
+export const getStatsOverview = () => axios.get(`${BASE}/stats/overview`, { headers: authHeaders() });
+export const getCardStats = (cardId) => axios.get(`${BASE}/stats/card/${cardId}`, { headers: authHeaders() });
+export const clearStats = () => axios.delete(`${BASE}/stats/clear`, { headers: authHeaders() });

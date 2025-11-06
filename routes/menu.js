@@ -1,6 +1,7 @@
 const express = require('express');
 const db = require('../db-switch');
 const auth = require('./authMiddleware');
+const { cache, cacheMiddleware } = require('../cache');
 const router = express.Router();
 
 // 获取所有菜单（包含子菜单）
@@ -81,6 +82,11 @@ router.put('/:id', auth, async (req, res) => {
 router.delete('/:id', auth, async (req, res) => {
   try {
     const result = await db.run('DELETE FROM menus WHERE id=?', [req.params.id]);
+    
+    // 清除缓存
+    await cache.delPattern('menus:*');
+    await cache.delPattern('cards:*');
+    
     res.json({ deleted: result.changes });
   } catch (err) {
     res.status(500).json({error: err.message});
@@ -112,6 +118,11 @@ router.put('/submenus/:id', auth, async (req, res) => {
 router.delete('/submenus/:id', auth, async (req, res) => {
   try {
     const result = await db.run('DELETE FROM sub_menus WHERE id=?', [req.params.id]);
+    
+    // 清除缓存
+    await cache.delPattern('menus:*');
+    await cache.delPattern('cards:*');
+    
     res.json({ deleted: result.changes });
   } catch (err) {
     res.status(500).json({error: err.message});

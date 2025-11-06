@@ -9,7 +9,7 @@
          @dragend="handleDragEnd"
          @dragover.prevent="handleDragOver($event, index)"
          @drop="handleDrop($event, index)">
-      <a :href="card.url" target="_blank" :title="getTooltip(card)" @click="handleLinkClick">
+      <a :href="card.url" target="_blank" :title="getTooltip(card)" @click="handleLinkClick($event, card)">
         <img class="link-icon" :src="getLogo(card)" alt="" @error="onImgError($event, card)" loading="lazy">
         <span class="link-text">{{ truncate(card.title) }}</span>
       </a>
@@ -19,6 +19,7 @@
 
 <script setup>
 import { ref, watch, nextTick } from 'vue';
+import { recordClick } from '../api';
 
 const props = defineProps({ cards: Array });
 const emit = defineEmits(['reorder']);
@@ -71,10 +72,18 @@ function handleDrop(e, dropIndex) {
   dragOverIndex.value = null;
 }
 
-function handleLinkClick(e) {
+function handleLinkClick(e, card) {
   // 如果正在拖拽，阻止链接跳转
   if (isDragging.value) {
     e.preventDefault();
+    return;
+  }
+  
+  // 记录点击统计（异步，不等待结果）
+  if (card && card.id) {
+    recordClick(card.id).catch(err => {
+      console.error('记录点击失败:', err);
+    });
   }
 }
 

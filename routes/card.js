@@ -1,10 +1,11 @@
 const express = require('express');
 const db = require('../db-switch');
 const auth = require('./authMiddleware');
+const { cache, cacheMiddleware } = require('../cache');
 const router = express.Router();
 
-// 获取指定菜单的卡片
-router.get('/:menuId', async (req, res) => {
+// 获取指定菜单的卡片（使用缓存，5分钟过期）
+router.get('/:menuId', cacheMiddleware('cards', 300), async (req, res) => {
   try {
     const { subMenuId } = req.query;
     let query, params;
@@ -37,8 +38,12 @@ router.get('/:menuId', async (req, res) => {
 router.post('/', auth, async (req, res) => {
   try {
     const { menu_id, sub_menu_id, title, url, logo_url, custom_logo_path, desc, order } = req.body;
-    const result = await db.run('INSERT INTO cards (menu_id, sub_menu_id, title, url, logo_url, custom_logo_path, description, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', 
+    const result = await db.run('INSERT INTO cards (menu_id, sub_menu_id, title, url, logo_url, custom_logo_path, description, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
       [menu_id, sub_menu_id || null, title, url, logo_url, custom_logo_path, desc, order || 0]);
+    
+    // 清除缓存
+    await cache.delPattern('cards:*');
+    
     res.json({ id: result.lastID });
   } catch (err) {
     res.status(500).json({error: err.message});
@@ -48,8 +53,12 @@ router.post('/', auth, async (req, res) => {
 router.put('/:id', auth, async (req, res) => {
   try {
     const { menu_id, sub_menu_id, title, url, logo_url, custom_logo_path, desc, order } = req.body;
-    const result = await db.run('UPDATE cards SET menu_id=?, sub_menu_id=?, title=?, url=?, logo_url=?, custom_logo_path=?, description=?, sort_order=? WHERE id=?', 
+    const result = await db.run('UPDATE cards SET menu_id=?, sub_menu_id=?, title=?, url=?, logo_url=?, custom_logo_path=?, description=?, sort_order=? WHERE id=?',
       [menu_id, sub_menu_id || null, title, url, logo_url, custom_logo_path, desc, order || 0, req.params.id]);
+    
+    // 清除缓存
+    await cache.delPattern('cards:*');
+    
     res.json({ changed: result.changes });
   } catch (err) {
     res.status(500).json({error: err.message});
@@ -59,6 +68,10 @@ router.put('/:id', auth, async (req, res) => {
 router.delete('/:id', auth, async (req, res) => {
   try {
     const result = await db.run('DELETE FROM cards WHERE id=?', [req.params.id]);
+    
+    // 清除缓存
+    await cache.delPattern('cards:*');
+    
     res.json({ deleted: result.changes });
   } catch (err) {
     res.status(500).json({error: err.message});
