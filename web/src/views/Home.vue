@@ -6,6 +6,7 @@
         <button
           v-for="menu in menus"
           :key="menu.id"
+          @mouseenter="selectMenu(menu)"
           @click="selectMenu(menu)"
           :class="['main-menu-btn', {active: menu.id === activeMenu?.id}]"
         >
@@ -49,6 +50,7 @@
           <button
             v-for="subMenu in activeMenu.subMenus"
             :key="subMenu.id"
+            @mouseenter="selectSubMenu(subMenu)"
             @click="selectSubMenu(subMenu)"
             :class="['submenu-btn', {active: subMenu.id === activeSubMenu?.id}]"
           >
@@ -311,14 +313,14 @@ function handleCardReorder(newCards) {
 /* 主菜单横向滚动样式 - 毛玻璃效果 */
 .main-menu-scroll-container {
   position: fixed;
-  top: 0.6rem;
+  top: 0;
   left: 0;
   width: 100vw;
   z-index: 100;
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(20px) saturate(180%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.18);
-  padding: 0.5rem 0;
+  padding: 0.8rem 0;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
@@ -469,19 +471,15 @@ function handleCardReorder(newCards) {
 
 .home-container {
   min-height: 95vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
-  background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
+  background-image: url('https://main.ssss.nyc.mn/background.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   display: flex;
   flex-direction: column;
   position: relative;
   padding-top: 50px;
-}
-
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
 }
 
 .home-container::before {
@@ -491,7 +489,7 @@ function handleCardReorder(newCards) {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.15);
+  background: rgba(0, 0, 0, 0.3);
   z-index: 1;
 }
 
