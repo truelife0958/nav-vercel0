@@ -18,20 +18,20 @@
         <h4 class="section-title">📊 CSV格式导出</h4>
         <p class="section-desc">导出单独的数据表格，可用Excel打开</p>
         <div class="export-buttons">
-          <button @click="exportCardsCSV" class="btn btn-secondary" :disabled="exporting">
+          <button @click="handleExportCards" class="btn btn-secondary" :disabled="exporting">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="3" width="18" height="18" rx="2"/>
               <path d="M3 9h18M9 21V9"/>
             </svg>
             导出卡片
           </button>
-          <button @click="exportMenusCSV" class="btn btn-secondary" :disabled="exporting">
+          <button @click="handleExportMenus" class="btn btn-secondary" :disabled="exporting">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M3 12h18M3 6h18M3 18h18"/>
             </svg>
             导出菜单
           </button>
-          <button @click="exportFriendsCSV" class="btn btn-secondary" :disabled="exporting">
+          <button @click="handleExportFriends" class="btn btn-secondary" :disabled="exporting">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
               <circle cx="9" cy="7" r="4"/>
@@ -61,7 +61,12 @@
 
 <script setup>
 import { ref } from 'vue';
-import { exportDataJSON, exportCardsCSV, exportMenusCSV, exportFriendsCSV } from '../../api';
+import {
+  exportDataJSON,
+  exportCardsCSV as apiExportCardsCSV,
+  exportMenusCSV as apiExportMenusCSV,
+  exportFriendsCSV as apiExportFriendsCSV
+} from '../../api';
 
 const exporting = ref(false);
 const message = ref('');
@@ -84,16 +89,16 @@ async function exportJSON() {
   }
 }
 
-async function exportCardsCSV() {
-  await exportCSV(exportCardsCSV, 'cards');
+async function handleExportCards() {
+  await exportCSV(apiExportCardsCSV, 'cards');
 }
 
-async function exportMenusCSV() {
-  await exportCSV(exportMenusCSV, 'menus');
+async function handleExportMenus() {
+  await exportCSV(apiExportMenusCSV, 'menus');
 }
 
-async function exportFriendsCSV() {
-  await exportCSV(exportFriendsCSV, 'friends');
+async function handleExportFriends() {
+  await exportCSV(apiExportFriendsCSV, 'friends');
 }
 
 async function exportCSV(exportFunc, name) {
