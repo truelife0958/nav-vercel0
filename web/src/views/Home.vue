@@ -308,16 +308,18 @@ function handleCardReorder(newCards) {
 </script>
 
 <style scoped>
-/* 主菜单横向滚动样式 */
+/* 主菜单横向滚动样式 - 毛玻璃效果 */
 .main-menu-scroll-container {
   position: fixed;
   top: 0.6rem;
   left: 0;
   width: 100vw;
   z-index: 100;
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
   padding: 0.5rem 0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 .main-menu-scroll-wrapper {
@@ -353,33 +355,35 @@ function handleCardReorder(newCards) {
 
 .main-menu-btn {
   flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   color: #fff;
   font-size: 15px;
   font-weight: 600;
   padding: 0.6rem 1.5rem;
   border-radius: 25px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .main-menu-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(57, 157, 255, 0.5);
-  color: #399dff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(57, 157, 255, 0.6);
+  color: #66b3ff;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(57, 157, 255, 0.3);
 }
 
 .main-menu-btn.active {
-  background: rgba(57, 157, 255, 0.4);
-  border-color: #399dff;
+  background: rgba(57, 157, 255, 0.35);
+  backdrop-filter: blur(15px) saturate(200%);
+  border-color: rgba(102, 179, 255, 0.8);
   color: #fff;
-  box-shadow: 0 4px 12px rgba(57, 157, 255, 0.4);
+  box-shadow: 0 8px 24px rgba(57, 157, 255, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.2);
 }
 
 .search-engine-select {
@@ -408,11 +412,12 @@ function handleCardReorder(newCards) {
 .search-container {
   display: flex;
   align-items: center;
-  background: #b3b7b83b;
-  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 24px;
   padding: 0.3rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   max-width: 480px;
   width: 92%;
   position: relative;
@@ -464,16 +469,19 @@ function handleCardReorder(newCards) {
 
 .home-container {
   min-height: 95vh;
-  background-image: url('https://main.ssss.nyc.mn/background.webp');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
   display: flex;
   flex-direction: column;
-  /* padding: 1rem 1rem; */
   position: relative;
-  padding-top: 50px; 
+  padding-top: 50px;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .home-container::before {
@@ -483,7 +491,7 @@ function handleCardReorder(newCards) {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.15);
   z-index: 1;
 }
 
@@ -537,33 +545,35 @@ function handleCardReorder(newCards) {
 
 .submenu-btn {
   flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   color: #fff;
   font-size: 14px;
   font-weight: 500;
   padding: 0.5rem 1.2rem;
   border-radius: 20px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .submenu-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(57, 157, 255, 0.5);
-  color: #399dff;
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(57, 157, 255, 0.6);
+  color: #66b3ff;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 20px rgba(57, 157, 255, 0.25);
 }
 
 .submenu-btn.active {
   background: rgba(57, 157, 255, 0.3);
-  border-color: #399dff;
-  color: #399dff;
-  box-shadow: 0 4px 12px rgba(57, 157, 255, 0.3);
+  backdrop-filter: blur(15px) saturate(200%);
+  border-color: rgba(102, 179, 255, 0.7);
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(57, 157, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2);
 }
 
 /* 分割线样式 */

@@ -249,11 +249,13 @@ function truncate(str) {
   }
 }
 .link-item {
-  background-color: rgba(255, 255, 255, 0.15);
-  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 16px;
   padding: 0;
-  transition: all 0.2s;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   text-align: center;
   min-height: 85px;
   height: 85px;
@@ -266,9 +268,11 @@ function truncate(str) {
 }
 
 .link-item:hover {
-  background-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(15px) saturate(200%);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), 0 0 20px rgba(255, 255, 255, 0.1);
 }
 
 .link-item.dragging {
@@ -277,8 +281,10 @@ function truncate(str) {
 }
 
 .link-item.drag-over {
-  border: 2px dashed #399dff;
-  background-color: rgba(57, 157, 255, 0.2);
+  border: 2px dashed #66b3ff;
+  background: rgba(57, 157, 255, 0.25);
+  backdrop-filter: blur(15px) saturate(180%);
+  box-shadow: 0 0 30px rgba(57, 157, 255, 0.4);
 }
 .link-item a {
   /* margin-top: 8px; */
