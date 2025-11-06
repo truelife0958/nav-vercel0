@@ -326,6 +326,7 @@ function handleCardReorder(newCards) {
 
 .main-menu-scroll-wrapper {
   display: flex;
+  justify-content: center;
   gap: 0.5rem;
   padding: 0 1rem;
   overflow-x: auto;
