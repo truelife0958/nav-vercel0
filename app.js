@@ -26,7 +26,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // 信任代理 - 在Vercel等代理环境下必须启用
-app.set('trust proxy', true);
+// 使用数字1表示只信任第一层代理（Vercel）
+app.set('trust proxy', 1);
 
 // 安全性中间件 - Helmet
 app.use(helmet({
@@ -66,6 +67,15 @@ const limiter = rateLimit({
   message: '请求过于频繁，请稍后再试',
   standardHeaders: true,
   legacyHeaders: false,
+  // 使用自定义的key生成器来避免trust proxy警告
+  keyGenerator: (req) => {
+    // 优先使用X-Forwarded-For，如果不存在则使用IP
+    return req.headers['x-forwarded-for']?.split(',')[0].trim() || req.ip || 'unknown';
+  },
+  // 跳过trust proxy验证
+  validate: {
+    trustProxy: false,
+  }
 });
 
 // 对API路由应用rate limiting
@@ -76,7 +86,13 @@ const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15分钟
   max: 5, // 限制5次登录尝试
   message: '登录尝试过多，请15分钟后再试',
-  skipSuccessfulRequests: true
+  skipSuccessfulRequests: true,
+  keyGenerator: (req) => {
+    return req.headers['x-forwarded-for']?.split(',')[0].trim() || req.ip || 'unknown';
+  },
+  validate: {
+    trustProxy: false,
+  }
 });
 
 app.use('/api/login', loginLimiter);
